@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All users</title>
+</head>
+<body>
+
+<div th:each="user : ${users}">
+  <p th:text="${user.getUsername() + ', ' + user.getEmail()}"></p>
+
+  <!-- Ссылка для редактирования пользователя -->
+  <a th:href="@{/admin/users/edit(id=${user.getId()})}">Edit</a>
+
+  <!-- Форма для удаления пользователя -->
+  <form th:method="post" th:action="@{/admin/users/delete(id=${user.getId()})}" style="display: inline;">
+    <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this user?');"/>
+  </form>
+
+  <hr/>
+</div>
+
+<br/>
+<a href="/admin/users/new">Create new user</a>
+<br/>
+<br/>
+<a href="http://localhost:8080/logout">Log out</a>
+
+</body>
+</html>
