@@ -1,31 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>New user</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <title>New User</title>
+  <style>
+    .container {
+      margin-top: 50px;
+    }
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
 
-<form th:method="POST" th:action="@{/admin}" th:object="${user}">
-  <label for="username">Enter name: </label>
-  <input type = "text" th:field="*{username}" id = "username" />
+<div class="container">
+  <h2>Add New User</h2>
+  <form th:method="POST" th:action="@{/admin}" th:object="${user}">
+    <div class="form-group">
+      <label for="firstname">First Name:</label>
+      <input type="text" th:field="*{firstName}" id="firstname" class="form-control" required />
+    </div>
 
-  <br/>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="text" th:field="*{username}" id="email" class="form-control" required />
+    </div>
 
-  <label for="email">Enter email: </label>
-  <input type="text" th:field="*{email}" id="email" >
+    <div class="form-group">
+      <label for="lastname">Last Name:</label>
+      <input type="text" th:field="*{lastName}" id="lastname" class="form-control" required />
+    </div>
 
-  <br/>
-  <label for="password">Enter password: </label>
-  <input type="text" th:field="*{password}" id="password" >
+    <div class="form-group">
+      <label for="age">Age:</label>
+      <input type="text" th:field="*{age}" id="age" class="form-control" required />
+    </div>
 
-<br/>
-  <input type="submit" value="Create!" />
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" th:field="*{password}" id="password" class="form-control" required />
+    </div>
 
-</form>
+    <div class="form-group">
+      <label for="roles">Roles:</label>
+      <select class="form-control" th:field="*{roles}" id="roles" multiple required>
+        <option value="4">Admin</option>
+        <option value="3">User</option>
+      </select>
+    </div>
 
-<br/>
-<br/>
-<a href="http://localhost:8080/logout">Log out</a>
+    <button type="submit" class="btn btn-primary">Create!</button>
+  </form>
+
+  <br />
+  <a href="http://localhost:8080/logout">Log out</a>
+</div>
+
 </body>
 </html>

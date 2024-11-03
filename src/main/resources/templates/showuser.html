@@ -1,20 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
     <title>User Info</title>
+    <style>
+        .top-panel {
+            background-color: #343a40; /* Темно-серая панель */
+            color: white; /* Цвет текста */
+            padding: 13px; /* Высота панели */
+            display: flex; /* Используем flexbox для расположения элементов */
+            justify-content: space-between; /* Располагаем элементы по краям */
+            align-items: center; /* Выравниваем по вертикали */
+        }
+
+        .sidebar {
+            background-color: white; /* Цвет бокового столбца */
+            height: 100vh; /* Полная высота страницы */
+            padding: 20px;
+            border-right: 1px solid #ddd; /* Разделительная линия */
+        }
+
+        .btn-light {
+            background-color: transparent; /* Убираем фон для неактивных кнопок */
+            color: black; /* Цвет текста для неактивных кнопок */
+            border: none; /* Убираем рамку */
+        }
+
+        .btn-light.active {
+            background-color: #007bff; /* Синий цвет для активной кнопки */
+            color: white; /* Цвет текста для активной кнопки */
+        }
+    </style>
 </head>
 <body>
 
-<h1>User Information</h1>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Темно-серая панель вверху -->
+        <div class="col-12 top-panel">
+            <div>
+                <span th:text="${user.username}"></span>
+                <span> with roles: </span>
+                <span th:each="role : ${user.getRoles()}" th:text="${#strings.replace(role.name, 'ROLE_', '')} + ' '"></span>
+            </div>
+            <a href="http://localhost:8080/logout" class="btn btn-outline-light">Logout</a>
+        </div>
 
-<p><strong>Username:</strong> <span th:text="${user.username}">Username</span></p>
-<p><strong>Email:</strong> <span th:text="${user.email}">Email</span></p>
-<p><strong>ID:</strong> <span th:text="${user.id}">ID</span></p>
+        <!-- Боковой столбец -->
+        <div class="col-md-2 sidebar">
+            <h4>Navigation</h4>
+            <a th:if="${roles.contains('ROLE_ADMIN')}" href="/admin/users" class="btn btn-light btn-block mb-2" th:classappend="${page == 'admin' ? 'active' : ''}">Admin</a>
+            <a href="/user" class="btn btn-primary btn-block mb-2 active">User</a> <!-- Здесь кнопка User всегда активная -->
+        </div>
 
-<br/>
+        <!-- Основное содержимое -->
+        <div class="col-md-9">
+            <h2>User information page</h2>
 
-<a href="/logout">Log out</a>
+            <!-- Вставка с серым фоном и текстом "About user" -->
+            <div style="background-color: #f8f9fa; padding: 10px; margin-bottom: 20px;">
+                <h4 style="color: black; margin: 0;">About user</h4>
+            </div>
+
+            <table class="table table-striped">
+                <thead class="thead-light">
+                <tr>
+                    <th style="font-weight: bold; color: black;">ID</th>
+                    <th style="font-weight: bold; color: black;">First Name</th>
+                    <th style="font-weight: bold; color: black;">Last Name</th>
+                    <th style="font-weight: bold; color: black;">Age</th>
+                    <th style="font-weight: bold; color: black;">Email</th>
+                    <th style="font-weight: bold; color: black;">Role</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.firstName}"></td>
+                    <td th:text="${user.lastName}"></td>
+                    <td th:text="${user.age}"></td>
+                    <td th:text="${user.username}"></td>
+                    <td>
+                        <span th:each="role, iterStat : ${user.roles}"
+                              th:text="${#strings.replace(role.name, 'ROLE_', '')} + ' '"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br/>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

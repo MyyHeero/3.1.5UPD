@@ -1,21 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
   <title>Update user</title>
 </head>
 <body>
 
 <form th:method="POST" th:action="@{/admin/users/update(id=${user.getId()})}" th:object="${user}">
-  <label for="username">Enter new username: </label>
-  <input type="text" th:field="*{username}" id="username" />
+  <label for="first_name">Enter new username: </label>
+  <input type="text" th:field="*{firstName}" id="first_name" />
 
   <br/>
 
-  <label for="email">Enter new email: </label>
-  <input type="text" th:field="*{email}" id="email">
+  <label for="username">Enter new email: </label>
+  <input type="text" th:field="*{username}" id="username">
 
   <br/>
+
+  <label for="lastname">Enter new lastname: </label>
+  <input type="text" th:field="*{lastName}" id="lastname">
+
+  <br/>
+
+  <label for="age">Enter new age: </label>
+  <input type="text" th:field="*{age}" id="age">
+
+  <br/>
+
+
 
   <label for="password">Enter new password: </label>
   <input type="text" th:field="*{password}" id="password">
