@@ -4,12 +4,26 @@ import java.util.List;
 import java.util.Set;
 
 public class UserUpdateRequestDTO {
+    private int id;
     private String username;
     private String password;
     private String firstName;
     private String lastName;
     private int age;
     private Set<String> roles;
+
+
+    public UserUpdateRequestDTO() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
 
     public String getUsername() {
         return username;

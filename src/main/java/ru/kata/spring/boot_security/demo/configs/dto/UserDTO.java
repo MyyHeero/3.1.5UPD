@@ -3,7 +3,7 @@ package ru.kata.spring.boot_security.demo.configs.dto;
 import java.util.Set;
 
 public class UserDTO {
-
+    private int id;
     private String firstName;
     private String lastName;
     private int age;
@@ -14,8 +14,11 @@ public class UserDTO {
     public UserDTO() {
     }
 
-    public UserDTO(String firstName, String lastName, int age, String username, Set<String> roles, String password) {
 
+
+    public UserDTO(String firstName, String lastName, int age, String username, Set<String> roles, String password, int id) {
+
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
@@ -71,5 +74,13 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

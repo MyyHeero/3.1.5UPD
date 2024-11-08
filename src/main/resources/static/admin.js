@@ -2,17 +2,72 @@ let userToDelete = null;
 
 $(document).ready(function() {
     loadRoles();
-    loadAdminView();
+    loadCurrentUserInfo();
 });
+
+function confirmLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+        window.location.href = "/logout";
+    }
+}
+
+function loadCurrentUserInfo() {
+    $.ajax({
+        url: '/api/user',
+        method: 'GET',
+        success: function(user) {
+            $('#currentUserInfo').text(`${user.username} with roles: ${user.roles.map(role => role.replace('ROLE_', '')).join(' ')}`);
+            loadUserInfo(user);
+
+            if (user.roles.includes('ROLE_ADMIN')) {
+                showAdminPanel();
+                showUsersTable();
+            } else {
+                showUserPanel();
+                $('#adminButton').hide();
+            }
+        },
+        error: function(err) {
+            console.error('Ошибка при загрузке данных текущего пользователя:', err);
+        }
+    });
+}
+
+function showAdminPanel() {
+    $('#adminPanel').show();
+    $('#userPanel').hide();
+    $('#adminButton').addClass('active');
+    $('#userButton').removeClass('active');
+}
+
+function showUserPanel() {
+    $('#adminPanel').hide();
+    $('#userPanel').show();
+    $('#adminButton').removeClass('active');
+    $('#userButton').addClass('active');
+}
+
+function loadUserInfo(user) {
+    $('#userInfo').html(`
+        <tr>
+            <td>${user.id}</td>
+            <td>${user.firstName}</td>
+            <td>${user.lastName}</td>
+            <td>${user.age}</td>
+            <td>${user.username}</td>
+            <td>${user.roles.map(role => role.replace('ROLE_', '')).join(' ')}</td>
+        </tr>
+    `);
+}
 
 function loadRoles() {
     $.ajax({
         url: '/api/roles',
         method: 'GET',
         success: function(roles) {
-            $('#roles').empty();
+            $('#editRoles').empty();
             roles.forEach(role => {
-                $('#roles').append(`<option value="${role.name}">${role.name.replace('ROLE_', '')}</option>`);
+                $('#editRoles').append(`<option value="${role.name}">${role.name.replace('ROLE_', '')}</option>`);
             });
         },
         error: function(err) {
@@ -21,34 +76,9 @@ function loadRoles() {
     });
 }
 
-function loadAdminView() {
-    $('#adminPanel').show();
-    $('#userFormContainer').hide();
-    showUsersTable();
-}
-
 function showUsersTable() {
     $('#userTableContainer').show();
-    $('#userFormContainer').hide();
-    $('#statusBar').text('All Users');
     fetchUsers();
-}
-
-function showUserForm() {
-    $('#userTableContainer').hide();
-    $('#userFormContainer').show();
-    $('#statusBar').text('Add New User');
-    clearForm();
-}
-
-function clearForm() {
-    $('#userId').val('');
-    $('#firstName').val('');
-    $('#lastName').val('');
-    $('#age').val('');
-    $('#username').val('');
-    $('#password').val('');
-    $('#roles').val('');
 }
 
 function fetchUsers() {
@@ -87,17 +117,18 @@ function fetchUsers() {
 }
 
 function saveUser() {
-    const userId = $('#userId').val();
+    const userId = $('#editUserId').val();
     const user = {
-        firstName: $('#firstName').val(),
-        lastName: $('#lastName').val(),
-        age: $('#age').val(),
-        username: $('#username').val(),
-        password: $('#password').val(),
-        roles: $('#roles').val()
+        id: userId,
+        firstName: $('#editFirstName').val(),
+        lastName: $('#editLastName').val(),
+        age: $('#editAge').val(),
+        username: $('#editUsername').val(),
+        password: $('#editPassword').val() || null,  // Оставляем пароль null, если поле пустое
+        roles: $('#editRoles').val()
     };
 
-    const url = userId ? `/api/admin/users/${userId}` : '/api/admin/users';
+    const url = userId ? '/api/admin/users' : '/api/admin/users';
     const method = userId ? 'PUT' : 'POST';
 
     $.ajax({
@@ -106,11 +137,8 @@ function saveUser() {
         contentType: 'application/json',
         data: JSON.stringify(user),
         success: function() {
-            showUsersTable();
-            clearForm();
-            $('#userFormContainer').hide();
-            $('#userTableContainer').show();
-            $('#statusBar').text('All Users');
+            $('#editUserModal').modal('hide');
+            fetchUsers();
         },
         error: function(err) {
             console.error('Ошибка при сохранении пользователя:', err);
@@ -118,19 +146,19 @@ function saveUser() {
     });
 }
 
-function confirmDeleteUser(id) {
-    userToDelete = id;
-
+function editUser(id) {
     $.ajax({
         url: `/api/admin/users/${id}`,
         method: 'GET',
         success: function(user) {
-            $('#modalFirstName').text(user.firstName);
-            $('#modalLastName').text(user.lastName);
-            $('#modalAge').text(user.age);
-            $('#modalUsername').text(user.username);
-            $('#modalRoles').text(user.roles.map(role => role.name.replace('ROLE_', '')).join(', '));
-            $('#deleteUserModal').modal('show');
+            $('#editUserId').val(user.id);
+            $('#editFirstName').val(user.firstName);
+            $('#editLastName').val(user.lastName);
+            $('#editAge').val(user.age);
+            $('#editUsername').val(user.username);
+            $('#editPassword').val('');  // Очищаем поле, чтобы при редактировании оно отображалось как пустое
+            $('#editRoles').val(user.roles.map(role => role.name));
+            $('#editUserModal').modal('show');
         },
         error: function(err) {
             console.error('Ошибка при загрузке данных пользователя:', err);
@@ -138,16 +166,34 @@ function confirmDeleteUser(id) {
     });
 }
 
-// Удаление пользователя при подтверждении в модальном окне
+function confirmDeleteUser(id) {
+    $.ajax({
+        url: `/api/admin/users/${id}`,
+        method: 'GET',
+        success: function(user) {
+            $('#modalFirstName').text(user.firstName);
+            $('#modalLastName').text(user.lastName);
+            $('#modalAge').text(user.age);
+            $('#modalEmail').text(user.username);
+            $('#modalRoles').text(user.roles.map(role => role.name.replace('ROLE_', '')).join(', '));
+            userToDelete = id;
+            $('#deleteUserModal').modal('show');
+        },
+        error: function(err) {
+            console.error('Ошибка при загрузке данных пользователя для удаления:', err);
+        }
+    });
+}
+
 $('#confirmDeleteBtn').click(function() {
     if (userToDelete) {
         $.ajax({
             url: `/api/admin/users/${userToDelete}`,
             method: 'DELETE',
             success: function() {
-                $('#deleteUserModal').modal('hide'); // Закрываем модальное окно
-                fetchUsers(); // Обновляем список пользователей после удаления
-                userToDelete = null; // Сбрасываем переменную после удаления
+                $('#deleteUserModal').modal('hide');
+                fetchUsers();
+                userToDelete = null;
             },
             error: function(err) {
                 console.error('Ошибка при удалении пользователя:', err);

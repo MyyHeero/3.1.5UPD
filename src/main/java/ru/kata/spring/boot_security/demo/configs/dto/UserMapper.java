@@ -26,6 +26,7 @@ public class UserMapper {
 
     public UserDTO toDTO(User user) {
         UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
         userDTO.setAge(user.getAge());
         userDTO.setFirstName(user.getFirstName());
@@ -36,8 +37,6 @@ public class UserMapper {
     }
 
     public User toEntity(UserDTO userDto) {
-        ModelMapper modelMapper = new ModelMapper();
-
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setAge(userDto.getAge());

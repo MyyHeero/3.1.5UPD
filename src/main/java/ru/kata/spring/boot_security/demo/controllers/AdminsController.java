@@ -65,37 +65,43 @@ public class AdminsController {
         adminService.save(user);
         return ResponseEntity.ok(HttpStatus.OK);
     }
+//
+//    @PutMapping
+//    public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequestDTO userUpdateRequestDTO) {
+//        User existingUser = adminService.findById(userUpdateRequestDTO.getId());
+//        if (existingUser == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+//        }
+//
+//        existingUser.setUsername(userUpdateRequestDTO.getUsername());
+//
+//        if (userUpdateRequestDTO.getPassword() != null && !userUpdateRequestDTO.getPassword().isEmpty()) {
+//            existingUser.setPassword(userUpdateRequestDTO.getPassword());
+//        } else {
+//            existingUser.setPassword(existingUser.getPassword());
+//        }
+//
+//        existingUser.setFirstName(userUpdateRequestDTO.getFirstName());
+//        existingUser.setLastName(userUpdateRequestDTO.getLastName());
+//        existingUser.setAge(userUpdateRequestDTO.getAge());
+//
+//        Set<Role> roles = roleService.findByNameIn(userUpdateRequestDTO.getRoles());
+//        existingUser.setRoles(roles);
+//        adminService.update(existingUser);
+//        return ResponseEntity.ok(HttpStatus.OK);
+//
+//    }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable("id") int id, @RequestBody UserUpdateRequestDTO userUpdateRequestDTO) {
-        User existingUser = adminService.findById(id);
-        if (existingUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
-        existingUser.setUsername(userUpdateRequestDTO.getUsername());
-        existingUser.setPassword(userUpdateRequestDTO.getPassword());
-        existingUser.setFirstName(userUpdateRequestDTO.getFirstName());
-        existingUser.setLastName(userUpdateRequestDTO.getLastName());
-        existingUser.setAge(userUpdateRequestDTO.getAge());
-
-        Set<Role> roles = new HashSet<>();
-        for (String roleName : userUpdateRequestDTO.getRoles()) {
-            Role role = roleService.findByName(roleName);
-            if (role != null) {
-                roles.add(role);
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role");
-            }
-        }
-        existingUser.setRoles(roles);
-        adminService.updateById(id, existingUser);
+    @PutMapping()
+    public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequestDTO userUpdateRequestDTO) {
+        adminService.update(userUpdateRequestDTO);
         return ResponseEntity.ok(HttpStatus.OK);
 
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable("id") int id) {
-        adminService.deleteById(id);
+        adminService.delete(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 

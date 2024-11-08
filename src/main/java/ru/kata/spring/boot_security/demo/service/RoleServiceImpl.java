@@ -7,6 +7,7 @@ import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -32,5 +33,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> findAll() {
         return roleRepository.findAll();
+    }
+
+    @Override
+    public Set<Role> findByNameIn(Set<String> names) {
+       return roleRepository.findByNameIn(names);
     }
 }

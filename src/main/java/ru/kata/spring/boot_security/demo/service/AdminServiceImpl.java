@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.configs.dto.UserUpdateRequestDTO;
 import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
@@ -12,21 +13,19 @@ import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 import ru.kata.spring.boot_security.demo.util.UserNotFoundException;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminServiceImpl implements AdminService {
 
-    private final RoleService roleService;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
     @Autowired
-    public AdminServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, RoleService roleService) {
-        this.roleService = roleService;
+    public AdminServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
@@ -42,7 +41,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Transactional
-    public void deleteById(int id) {
+    public void delete(int id) {
         userRepository.deleteById(id);
     }
 
@@ -58,26 +57,25 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Transactional
-    public void updateById(int id, User user) {
-        User existingUser = findById(id);
-
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+    public void update(UserUpdateRequestDTO userDTO) {
+        User existingUser = findById(userDTO.getId());
+        if (existingUser == null) {
+            throw new UserNotFoundException();
         }
-        existingUser.setAge(user.getAge());
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
 
-        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-            // Получаем первую роль для добавления
-            Role newRole = roleService.findByName(user.getRoles().iterator().next().getName());
+        existingUser.setUsername(userDTO.getUsername());
 
-            // Если роль уже есть, не добавляем ее
-            if (!existingUser.getRoles().contains(newRole)) {
-                existingUser.getRoles().add(newRole); // Добавляем новую роль
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            if (!passwordEncoder.matches(userDTO.getPassword(), existingUser.getPassword())) {
+                existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
             }
         }
-
+        existingUser.setAge(userDTO.getAge());
+        existingUser.setFirstName(userDTO.getFirstName());
+        existingUser.setLastName(userDTO.getLastName());
+        Set<Role> updatedRoles = new HashSet<>(roleRepository.findByNameIn(userDTO.getRoles()));
+        existingUser.setRoles(updatedRoles);
         userRepository.save(existingUser);
     }
 
