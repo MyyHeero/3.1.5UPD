@@ -9,7 +9,9 @@ import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
+import ru.kata.spring.boot_security.demo.util.UserNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -29,10 +31,10 @@ public class AdminServiceImpl implements AdminService {
         this.userRepository = userRepository;
     }
 
+
     @Transactional
     public void save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword())); // Кодируем пароль
-        // Устанавливаем роль, если она передана
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             user.setRoles(new HashSet<>(user.getRoles())); // Просто преобразуем роли в набор
         }
@@ -47,10 +49,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public User findById(Integer id) {
         Optional<User> optional = userRepository.findById(id);
-        if (optional.isEmpty()) {
-            throw new UsernameNotFoundException(String.format("User %s not found", id));
-        }
-        return optional.get();
+        return optional.orElseThrow(UserNotFoundException::new);
     }
 
     @Transactional(readOnly = true)

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <title>Admin Panel - All Users</title>
+  <style>
+    body {
+      background-color: #f1f1f1;
+    }
+    .sidebar {
+      background-color: #343a40;
+      color: white;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .sidebar h4 {
+      font-weight: bold;
+      color: #ced4da;
+      font-size: 1.25rem;
+    }
+    .sidebar button {
+      background: none;
+      border: none;
+      color: #ced4da;
+      font-weight: bold;
+      text-align: left;
+      padding: 10px 20px;
+      width: 100%;
+    }
+    .sidebar button.active {
+      color: white;
+      background-color: #007bff;
+    }
+    .btn-custom {
+      color: white;
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    #userTableContainer .table thead {
+      background-color: #007bff;
+      color: white;
+    }
+    #userTableContainer .table-striped tbody tr:nth-of-type(odd) {
+      background-color: #f9f9f9;
+    }
+    #userTableContainer .table-striped tbody tr:nth-of-type(even) {
+      background-color: #e9ecef;
+    }
+    #userTableContainer .table th, .table td {
+      vertical-align: middle;
+      text-align: center;
+    }
+    .table-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .status-bar {
+      background-color: #e9ecef;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #343a40;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-2 sidebar">
+      <h4>Navigation</h4>
+      <button onclick="loadAdminView()" class="btn btn-custom btn-block mb-2 active">Admin</button>
+      <button onclick="loadUserView()" class="btn btn-custom btn-block mb-2">User</button>
+    </div>
+
+    <div class="col-10">
+      <h2 class="my-4">Admin Panel</h2>
+
+      <div class="status-bar" id="statusBar">All Users</div>
+
+      <div id="adminPanel" style="display: none;">
+        <button onclick="showUsersTable()" class="btn btn-primary mb-3">Users Table</button>
+        <button onclick="showUserForm()" class="btn btn-primary mb-3">Add New User</button>
+
+        <div id="userTableContainer"></div>
+      </div>
+
+      <div id="userFormContainer" style="display: none;">
+        <h4>Add/Edit User</h4>
+        <form id="userForm">
+          <input type="hidden" id="userId">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" class="form-control" required>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="age">Age</label>
+              <input type="number" id="age" class="form-control" required>
+            </div>
+            <div class="form-group col-md-4">
+              <label for="username">Email</label>
+              <input type="email" id="username" class="form-control" required>
+            </div>
+            <div class="form-group col-md-4">
+              <label for="password">Password</label>
+              <input type="password" id="password" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="roles">Roles</label>
+            <select id="roles" class="form-control" multiple required></select>
+          </div>
+          <button type="button" onclick="saveUser()" class="btn btn-success">Save</button>
+          <button type="button" onclick="cancelUserForm()" class="btn btn-danger">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
