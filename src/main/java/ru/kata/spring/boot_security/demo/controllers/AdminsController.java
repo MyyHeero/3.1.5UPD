@@ -27,12 +27,10 @@ import java.util.*;
 public class AdminsController {
 
     private final AdminService adminService;
-    private final RoleService roleService;
     private final UserMapper userMapper;
 
     @Autowired
-    public AdminsController(AdminService adminService, RoleService roleService, UserMapper userMapper) {
-        this.roleService = roleService;
+    public AdminsController(AdminService adminService, UserMapper userMapper) {
         this.adminService = adminService;
         this.userMapper = userMapper;
     }
@@ -65,32 +63,7 @@ public class AdminsController {
         adminService.save(user);
         return ResponseEntity.ok(HttpStatus.OK);
     }
-//
-//    @PutMapping
-//    public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequestDTO userUpdateRequestDTO) {
-//        User existingUser = adminService.findById(userUpdateRequestDTO.getId());
-//        if (existingUser == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-//        }
-//
-//        existingUser.setUsername(userUpdateRequestDTO.getUsername());
-//
-//        if (userUpdateRequestDTO.getPassword() != null && !userUpdateRequestDTO.getPassword().isEmpty()) {
-//            existingUser.setPassword(userUpdateRequestDTO.getPassword());
-//        } else {
-//            existingUser.setPassword(existingUser.getPassword());
-//        }
-//
-//        existingUser.setFirstName(userUpdateRequestDTO.getFirstName());
-//        existingUser.setLastName(userUpdateRequestDTO.getLastName());
-//        existingUser.setAge(userUpdateRequestDTO.getAge());
-//
-//        Set<Role> roles = roleService.findByNameIn(userUpdateRequestDTO.getRoles());
-//        existingUser.setRoles(roles);
-//        adminService.update(existingUser);
-//        return ResponseEntity.ok(HttpStatus.OK);
-//
-//    }
+
 
     @PutMapping()
     public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateRequestDTO userUpdateRequestDTO) {

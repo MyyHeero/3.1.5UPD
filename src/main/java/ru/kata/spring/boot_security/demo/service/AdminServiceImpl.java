@@ -1,33 +1,30 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.configs.dto.UserUpdateRequestDTO;
 import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
-import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
-import ru.kata.spring.boot_security.demo.repositories.UserRepository;
+import ru.kata.spring.boot_security.demo.repositories.RoleDAO;
+import ru.kata.spring.boot_security.demo.repositories.UserDAO;
 import ru.kata.spring.boot_security.demo.util.UserNotFoundException;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class AdminServiceImpl implements AdminService {
 
-    private final RoleRepository roleRepository;
+    private final RoleDAO roleDAO;
     private final PasswordEncoder passwordEncoder;
-    private final UserRepository userRepository;
+    private final UserDAO userDAO;
 
     @Autowired
-    public AdminServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
+    public AdminServiceImpl(PasswordEncoder passwordEncoder, UserDAO userDAO, RoleDAO roleDAO) {
+        this.roleDAO = roleDAO;
         this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
+        this.userDAO = userDAO;
     }
 
 
@@ -37,23 +34,22 @@ public class AdminServiceImpl implements AdminService {
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             user.setRoles(new HashSet<>(user.getRoles())); // Просто преобразуем роли в набор
         }
-        userRepository.save(user); // Сохраняем пользователя
+        userDAO.save(user); // Сохраняем пользователя
     }
 
     @Transactional
     public void delete(int id) {
-        userRepository.deleteById(id);
+        userDAO.delete(id);
     }
 
     @Transactional(readOnly = true)
     public User findById(Integer id) {
-        Optional<User> optional = userRepository.findById(id);
-        return optional.orElseThrow(UserNotFoundException::new);
+        return userDAO.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userDAO.findAll();
     }
 
     @Transactional
@@ -74,9 +70,9 @@ public class AdminServiceImpl implements AdminService {
         existingUser.setAge(userDTO.getAge());
         existingUser.setFirstName(userDTO.getFirstName());
         existingUser.setLastName(userDTO.getLastName());
-        Set<Role> updatedRoles = new HashSet<>(roleRepository.findByNameIn(userDTO.getRoles()));
+        Set<Role> updatedRoles = new HashSet<>(roleDAO.findByNameIn(userDTO.getRoles()));
         existingUser.setRoles(updatedRoles);
-        userRepository.save(existingUser);
+        userDAO.save(existingUser);
     }
 
 }

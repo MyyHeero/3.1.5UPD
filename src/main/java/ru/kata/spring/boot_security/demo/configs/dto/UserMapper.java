@@ -1,14 +1,12 @@
 package ru.kata.spring.boot_security.demo.configs.dto;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.kata.spring.boot_security.demo.entities.Role;
 import ru.kata.spring.boot_security.demo.entities.User;
-import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
+import ru.kata.spring.boot_security.demo.repositories.RoleDAO;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,11 +14,11 @@ import java.util.stream.Collectors;
 public class UserMapper {
 
 
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     @Autowired
-    public UserMapper(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
+    public UserMapper(RoleService roleService) {
+        this.roleService = roleService;
     }
 
 
@@ -42,7 +40,7 @@ public class UserMapper {
         user.setAge(userDto.getAge());
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
-        Set<Role> roles = userDto.getRoles().stream().map(role -> roleRepository.findByName(role))
+        Set<Role> roles = userDto.getRoles().stream().map(role -> roleService.findByName(role))
                 .filter(role -> role != null)
                 .collect(Collectors.toSet());
         user.setRoles(roles);

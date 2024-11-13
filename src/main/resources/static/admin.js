@@ -1,4 +1,5 @@
 let userToDelete = null;
+let currentUser = null; // Хранение текущего пользователя для панели пользователя
 
 $(document).ready(function() {
     loadRoles();
@@ -11,20 +12,22 @@ function confirmLogout() {
     }
 }
 
+// Загружаем информацию о текущем пользователе и настраиваем доступ к панелям
 function loadCurrentUserInfo() {
     $.ajax({
         url: '/api/user',
         method: 'GET',
         success: function(user) {
+            currentUser = user; // Сохраняем текущего пользователя
             $('#currentUserInfo').text(`${user.username} with roles: ${user.roles.map(role => role.replace('ROLE_', '')).join(' ')}`);
-            loadUserInfo(user);
 
+            // Проверяем роль и отображаем соответствующую панель
             if (user.roles.includes('ROLE_ADMIN')) {
                 showAdminPanel();
                 showUsersTable();
             } else {
                 showUserPanel();
-                $('#adminButton').hide();
+                $('#adminButton').hide(); // Скрываем кнопку "Admin" для обычного пользователя
             }
         },
         error: function(err) {
@@ -33,20 +36,29 @@ function loadCurrentUserInfo() {
     });
 }
 
+// Отображаем панель администратора
 function showAdminPanel() {
     $('#adminPanel').show();
     $('#userPanel').hide();
+    $('#addUserSection').hide(); // Скрываем секцию добавления нового пользователя
     $('#adminButton').addClass('active');
     $('#userButton').removeClass('active');
 }
 
+// Отображаем панель пользователя с информацией о текущем пользователе
 function showUserPanel() {
     $('#adminPanel').hide();
-    $('#userPanel').show();
+    $('#addUserSection').hide(); // Скрываем секцию добавления нового пользователя
+    $('#userPanel').show();      // Показываем панель пользователя
     $('#adminButton').removeClass('active');
     $('#userButton').addClass('active');
+
+    if (currentUser) {
+        loadUserInfo(currentUser);
+    }
 }
 
+// Загрузка информации о текущем пользователе в панель пользователя
 function loadUserInfo(user) {
     $('#userInfo').html(`
         <tr>
@@ -60,14 +72,17 @@ function loadUserInfo(user) {
     `);
 }
 
+// Загружаем роли в выпадающий список
 function loadRoles() {
     $.ajax({
         url: '/api/roles',
         method: 'GET',
         success: function(roles) {
             $('#editRoles').empty();
+            $('#editRolesModal').empty();
             roles.forEach(role => {
                 $('#editRoles').append(`<option value="${role.name}">${role.name.replace('ROLE_', '')}</option>`);
+                $('#editRolesModal').append(`<option value="${role.name}">${role.name.replace('ROLE_', '')}</option>`);
             });
         },
         error: function(err) {
@@ -76,11 +91,28 @@ function loadRoles() {
     });
 }
 
+// Показываем таблицу пользователей
 function showUsersTable() {
     $('#userTableContainer').show();
+    $('#addUserSection').hide();
     fetchUsers();
 }
 
+// Показываем секцию для добавления нового пользователя
+function showAddUserForm() {
+    $('#userTableContainer').hide();
+    $('#addUserSection').show();
+    $('#editUserId').val('');
+    $('#editFirstName').val('');
+    $('#editLastName').val('');
+    $('#editAge').val('');
+    $('#editUsername').val('');
+    $('#editPassword').val('');
+    $('#editRoles').val([]);
+    loadRoles();
+}
+
+// Загружаем всех пользователей для таблицы
 function fetchUsers() {
     $.ajax({
         url: '/api/admin/users',
@@ -116,29 +148,24 @@ function fetchUsers() {
     });
 }
 
+// Сохранение нового пользователя
 function saveUser() {
-    const userId = $('#editUserId').val();
     const user = {
-        id: userId,
         firstName: $('#editFirstName').val(),
         lastName: $('#editLastName').val(),
         age: $('#editAge').val(),
         username: $('#editUsername').val(),
-        password: $('#editPassword').val() || null,  // Оставляем пароль null, если поле пустое
+        password: $('#editPassword').val() || null,
         roles: $('#editRoles').val()
     };
 
-    const url = userId ? '/api/admin/users' : '/api/admin/users';
-    const method = userId ? 'PUT' : 'POST';
-
     $.ajax({
-        url: url,
-        method: method,
+        url: '/api/admin/users',
+        method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(user),
         success: function() {
-            $('#editUserModal').modal('hide');
-            fetchUsers();
+            showUsersTable();
         },
         error: function(err) {
             console.error('Ошибка при сохранении пользователя:', err);
@@ -146,22 +173,50 @@ function saveUser() {
     });
 }
 
+// Открываем модальное окно для редактирования пользователя
 function editUser(id) {
     $.ajax({
         url: `/api/admin/users/${id}`,
         method: 'GET',
         success: function(user) {
-            $('#editUserId').val(user.id);
-            $('#editFirstName').val(user.firstName);
-            $('#editLastName').val(user.lastName);
-            $('#editAge').val(user.age);
-            $('#editUsername').val(user.username);
-            $('#editPassword').val('');  // Очищаем поле, чтобы при редактировании оно отображалось как пустое
-            $('#editRoles').val(user.roles.map(role => role.name));
-            $('#editUserModal').modal('show');
+            $('#editUserIdModal').val(user.id);
+            $('#editFirstNameModal').val(user.firstName);
+            $('#editLastNameModal').val(user.lastName);
+            $('#editAgeModal').val(user.age);
+            $('#editUsernameModal').val(user.username);
+            $('#editPasswordModal').val('');
+            $('#editRolesModal').val(user.roles.map(role => role.name));
+            $('#editUserModal').modal('show'); // Показываем модальное окно для редактирования
         },
         error: function(err) {
             console.error('Ошибка при загрузке данных пользователя:', err);
+        }
+    });
+}
+
+// Сохранение отредактированного пользователя
+function saveEditedUser() {
+    const user = {
+        id: $('#editUserIdModal').val(),
+        firstName: $('#editFirstNameModal').val(),
+        lastName: $('#editLastNameModal').val(),
+        age: $('#editAgeModal').val(),
+        username: $('#editUsernameModal').val(),
+        password: $('#editPasswordModal').val() || null,
+        roles: $('#editRolesModal').val()
+    };
+
+    $.ajax({
+        url: `/api/admin/users`,
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(user),
+        success: function() {
+            $('#editUserModal').modal('hide');
+            fetchUsers();
+        },
+        error: function(err) {
+            console.error('Ошибка при обновлении пользователя:', err);
         }
     });
 }
